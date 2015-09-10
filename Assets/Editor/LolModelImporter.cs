@@ -61,23 +61,23 @@ class ImportSkn : ScriptableWizard
 					}
 				}
 
-				byte countBlock = new byte[8];
+				byte[] countBlock = new byte[8];
 				fs.Read (countBlock,0,8);
 				int numIndices = BitConverter.ToInt32 (countBlock,0);
 				int numVertices = BitConverter.ToInt32 (countBlock,4);
 
 				Debug.Log("numIndices : " + numIndices + "\nnumVertices : " + numVertices);
 
-				short[] indices = new short[numIndices];
+				int[] indices = new int[numIndices];
 				byte[] indexBlock = new byte[2];
 				for(int i=0;i<numIndices;i++) {
 					fs.Read (indexBlock,0,2);
-					indices[i] = BitConverter.ToInt16 (indexBlock,0);
+					indices[i] = (int)BitConverter.ToInt16 (indexBlock,0);
 				}
 
-				Vector3[] vertexPositions = new Vector3[numVertices];
-				BoneWeight[] boneWeights = new Vector3[numVertices];
-				Vector2[] texcoords = new Vector3[numVertices];
+				Vector3[] vertices = new Vector3[numVertices];
+				BoneWeight[] boneWeights = new BoneWeight[numVertices];
+				Vector2[] uv = new Vector2[numVertices];
 				Vector3[] normals = new Vector3[numVertices];
 
 				byte[] vertexBlock = new byte[52];
@@ -86,11 +86,47 @@ class ImportSkn : ScriptableWizard
 					float x = BitConverter.ToSingle(vertexBlock,0);
 					float y = BitConverter.ToSingle(vertexBlock,4);
 					float z = BitConverter.ToSingle(vertexBlock,8);
+					char boneIdx0 = BitConverter.ToChar(vertexBlock,12);
+					char boneIdx1 = BitConverter.ToChar(vertexBlock,13);
+					char boneIdx2 = BitConverter.ToChar(vertexBlock,14);
+					char boneIdx3 = BitConverter.ToChar(vertexBlock,15);
+					float boneWeight0 = BitConverter.ToSingle(vertexBlock,16);
+					float boneWeight1 = BitConverter.ToSingle(vertexBlock,20);
+					float boneWeight2 = BitConverter.ToSingle(vertexBlock,24);
+					float boneWeight3 = BitConverter.ToSingle(vertexBlock,28);
 
+					float normalX = BitConverter.ToSingle(vertexBlock,32);
+					float normalY = BitConverter.ToSingle(vertexBlock,36);
+					float normalZ = BitConverter.ToSingle(vertexBlock,40);
+
+					float u = BitConverter.ToSingle(vertexBlock,44);
+					float v = 1-BitConverter.ToSingle(vertexBlock,48);
+
+
+
+					vertices[i] = new Vector3(x,y,z);
+					boneWeights[i].boneIndex0 = (int)boneIdx0;
+					boneWeights[i].boneIndex1 = (int)boneIdx1;
+					boneWeights[i].boneIndex2 = (int)boneIdx2;
+					boneWeights[i].boneIndex3 = (int)boneIdx3;
+					boneWeights[i].weight0 = boneWeight0;
+					boneWeights[i].weight1 = boneWeight1;
+					boneWeights[i].weight2 = boneWeight2;
+					boneWeights[i].weight3 = boneWeight3;
+					normals[i] = new Vector3(normalX,normalY,normalZ);
+					uv[i] = new Vector2(u,v);
 
 				}
 
 				Mesh mesh = new Mesh();
+				mesh.vertices = vertices;
+				mesh.uv = uv;
+				mesh.triangles = indices;
+				mesh.boneWeights = boneWeights;
+				mesh.normals = normals;
+
+
+				AssetDatabase.CreateAsset(mesh,"Assets/CreatedAsset/created.asset");
 			}
 		}
 		catch(Exception e) {
