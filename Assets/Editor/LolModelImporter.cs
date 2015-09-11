@@ -1,8 +1,145 @@
 ﻿using UnityEngine;
 using UnityEditor;
 using System.Collections;
+using System.Collections.Generic;
 using System.IO;
 using System;
+
+class ImportAnm : ScriptableWizard
+{
+	public UnityEngine.Object anmFile;
+	public Transform obj;
+	public string name;
+
+	[MenuItem("Custom/LOL/Import Anm")]
+	static void CreateWizard() {
+		ScriptableWizard.DisplayWizard<ImportAnm> ("Import Skl", "Import");
+	}
+	void OnWizardCreate() {
+		//test create animation
+
+		/*
+		AnimationClip clip = new AnimationClip ();
+
+		AnimationCurve curveX = new AnimationCurve ();
+		AnimationCurve curveY = new AnimationCurve ();
+		AnimationCurve curveZ = new AnimationCurve ();
+		for (int i=0; i<=60; i++) {
+			curveX.AddKey (i / 60f, i);
+			curveY.AddKey (i / 60f, i);
+			curveZ.AddKey (i / 60f, i);
+		}
+		clip.SetCurve ("root", typeof(Transform), "m_LocalPosition.x", curveX);
+		clip.SetCurve ("root", typeof(Transform), "m_LocalPosition.y", curveY);
+		clip.SetCurve ("root", typeof(Transform), "m_LocalPosition.z", curveZ);
+
+		AssetDatabase.CreateAsset (clip, "Assets/CreatedAsset/testAnim.anim");
+
+		*/
+		if (anmFile == null) {
+			Debug.LogError ("null skl file");
+			return;
+		}
+
+		try {
+			AnimationClip clip = new AnimationClip();
+
+			string anmPath = AssetDatabase.GetAssetPath (anmFile);
+
+
+			Dictionary<string,string> nameToPath = new Dictionary<string, string>();
+			if(obj != null) {
+				Transform[] children = obj.GetComponentsInChildren<Transform>();
+				foreach(Transform child in children) {
+					Transform cur = child;
+					string path = child.name;
+					while(cur != null && cur.parent != obj && cur.parent != null) {
+						cur = cur.parent;
+						path = cur.name + "/" + path;
+					}
+					nameToPath.Add (child.name,path);
+				}
+
+			}
+			using (FileStream fs = File.OpenRead(anmPath)) {
+				byte[] headerBlock = new byte[28];
+				fs.Read (headerBlock, 0, 28);
+				string id = System.Text.Encoding.ASCII.GetString (headerBlock, 0, 8).TrimEnd ('\0');
+				int version = BitConverter.ToInt32 (headerBlock, 8);
+				int dontknow = BitConverter.ToInt32 (headerBlock, 12);
+				int numOfBones = BitConverter.ToInt32 (headerBlock, 16);
+				int numOfFrames = BitConverter.ToInt32 (headerBlock, 20);
+				int playBackFPS = BitConverter.ToInt32 (headerBlock, 24);
+
+				//int boneBlockSize = 36 + (numOfFrames * 28);
+				byte[] boneHeaderBlock = new byte[36];
+				byte[] frameBlock = new byte[28];
+
+
+				for (int i=0; i<numOfBones; i++) {
+					fs.Read (boneHeaderBlock, 0, 36);
+					string boneName = System.Text.Encoding.ASCII.GetString (boneHeaderBlock, 0, 32).TrimEnd ('\0');
+					int dontknow2 = BitConverter.ToInt32 (boneHeaderBlock, 32);
+
+					string path = boneName;
+					if(nameToPath.ContainsKey(boneName)) {
+						path = nameToPath[boneName];
+					}
+
+					AnimationCurve curveRX = new AnimationCurve();
+					AnimationCurve curveRY = new AnimationCurve();
+					AnimationCurve curveRZ = new AnimationCurve();
+					AnimationCurve curveRW = new AnimationCurve();
+
+					AnimationCurve curvePX = new AnimationCurve();
+					AnimationCurve curvePY = new AnimationCurve();
+					AnimationCurve curvePZ = new AnimationCurve();
+
+
+					for (int j=0; j<numOfFrames; j++) {
+						fs.Read (frameBlock, 0, 28);
+						float rx = BitConverter.ToSingle (frameBlock, 0);
+						float ry = BitConverter.ToSingle (frameBlock, 4);
+						float rz = BitConverter.ToSingle (frameBlock, 8);
+						float rw = BitConverter.ToSingle (frameBlock, 12);
+						float px = BitConverter.ToSingle (frameBlock, 16);
+						float py = BitConverter.ToSingle (frameBlock, 20);
+						float pz = BitConverter.ToSingle (frameBlock, 24);
+						float time = j/60f;
+						curveRX.AddKey(time,rx);
+						curveRY.AddKey(time,ry);
+						curveRZ.AddKey (time,rz);
+						curveRW.AddKey(time,rw);
+						curvePX.AddKey(time,px);
+						curvePY.AddKey(time,py);
+						curvePZ.AddKey(time,pz);
+					}
+					clip.SetCurve(path,typeof(Transform),"m_LocalRotation.x",curveRX);
+					clip.SetCurve(path,typeof(Transform),"m_LocalRotation.y",curveRY);
+					clip.SetCurve(path,typeof(Transform),"m_LocalRotation.z",curveRZ);
+					clip.SetCurve(path,typeof(Transform),"m_LocalRotation.w",curveRW);
+					clip.SetCurve(path,typeof(Transform),"m_LocalPosition.x",curvePX);
+					clip.SetCurve(path,typeof(Transform),"m_LocalPosition.y",curvePY);
+					clip.SetCurve(path,typeof(Transform),"m_LocalPosition.z",curvePZ);
+
+				}
+
+
+				/*
+				Debug.Log ("version : " + version + "\nnum of bones : " + numOfBones + "\nnum of frames : " + numOfFrames + "\nplaybackFPS : " + playBackFPS);
+
+				int expectedsize = 28 + ((28 * numOfFrames) + 36) * numOfBones;
+				Debug.Log ("Expected Size : " + expectedsize + "\nread Size : " + fs.Length);*/
+
+				AssetDatabase.CreateAsset(clip,"Assets/CreatedAsset/"+name+".anim");
+
+			}
+		} catch (Exception e) {
+			Debug.LogError(e);
+		}
+	}
+}
+
 
 class ImportSkl : ScriptableWizard
 {
@@ -219,17 +356,19 @@ class ImportSkn : ScriptableWizard
 					float v = 1-BitConverter.ToSingle(vertexBlock,48);
 
 
-					//////basic skin blitzcrank bone idx matching error temporary fix
-					if(boneIdx0 >= 22) {
+					//////basic skin blitzcrank bone idx matching error temporary fix >22, +=2
+					//////custom skin blitzcrank bone idx matching error temporary fix >20 +=2
+
+					if(boneIdx0 >= 20) {
 						boneIdx0 +=2;
 					}
-					if(boneIdx1 >= 22) {
+					if(boneIdx1 >= 20) {
 						boneIdx1 +=2;
 					}
-					if(boneIdx2 >= 22) {
+					if(boneIdx2 >= 20) {
 						boneIdx2 += 2;
 					}
-					if(boneIdx3 >= 22) {
+					if(boneIdx3 >= 20) {
 						boneIdx3 += 2;
 					}
 					//////////
