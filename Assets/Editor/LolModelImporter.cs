@@ -39,9 +39,13 @@ class ImportSkl : ScriptableWizard
 			}
 			
 			byte[] boneBlock = new byte[88];
+			Transform rootBone = null;
 			for(int i=0;i<numElements;i++) {
 				fs.Read (boneBlock,0,88);
 				string boneName = System.Text.Encoding.ASCII.GetString (boneBlock,0,32).TrimEnd('\0');
+
+
+
 				int parent = BitConverter.ToInt32 (boneBlock,32);
 				float scale = BitConverter.ToSingle (boneBlock,36);
 				float[,] matrix = new float[3,4];
@@ -50,24 +54,39 @@ class ImportSkl : ScriptableWizard
 						matrix[n,m] = BitConverter.ToSingle(boneBlock,40 + n*16 + m*4);
 					}
 				}
-				
+
+
+			
 				bones[i].gameObject.name = boneName;
 				bones[i].parent = parent>=0?bones[parent]:go.transform;
+
+
+				if(boneName == "root" && parent<0) {
+					rootBone = bones[i];
+				}
+
+
+				bones[i].position = new Vector3(matrix[0,3],matrix[1,3],matrix[2,3]);
+
+
+				//bones[i].localRotation = new Quaternion(qx,qy,qz,qw);
 				
-				bones[i].localPosition = new Vector3(matrix[0,3],matrix[1,3],matrix[2,3]);
-				
-				float qw = Mathf.Sqrt (1f + matrix[0,0] + matrix[1,1] + matrix[2,2])/2f;
-				float w  = 4f * qw;
-				float qx = (matrix[2,1] - matrix[1,2])/w;
-				float qy = (matrix[0,2] - matrix[2,0])/w;
-				float qz = (matrix[1,0] - matrix[0,1])/w;
-				
-				bones[i].localRotation = new Quaternion(qx,qy,qz,qw);
-				
-				float sx = Mathf.Sqrt (matrix[0,0]*matrix[0,0] + matrix[0,1]*matrix[0,1] + matrix[0,2]*matrix[0,2]);
-				float sy = Mathf.Sqrt (matrix[1,0]*matrix[1,0] + matrix[1,1]*matrix[1,1] + matrix[1,2]*matrix[1,2]);
-				float sz = Mathf.Sqrt (matrix[2,0]*matrix[2,0] + matrix[2,1]*matrix[2,1] + matrix[2,2]*matrix[2,2]);
-				
+				Quaternion q = new Quaternion();
+				q.w = Mathf.Sqrt (Mathf.Max(0,1+matrix[0,0]+matrix[1,1]+matrix[2,2]))/2f;
+				q.x = Mathf.Sqrt (Mathf.Max (0,1+matrix[0,0]-matrix[1,1]-matrix[2,2]))/2f;
+				q.y = Mathf.Sqrt (Mathf.Max (0,1-matrix[0,0]+matrix[1,1]-matrix[2,2]))/2f;
+				q.z = Mathf.Sqrt (Mathf.Max (0,1-matrix[0,0]-matrix[1,1]+matrix[2,2]))/2f;
+				q.x *= Mathf.Sign(q.x * (matrix[2,1]-matrix[1,2]));
+				q.y *= Mathf.Sign (q.y * (matrix[0,2] - matrix[2,0]));
+				q.z *= Mathf.Sign (q.z * (matrix[1,0] - matrix[0,1]));
+
+				bones[i].rotation = q;
+
+
+				float sx = (new Vector3(matrix[0,0],matrix[1,0],matrix[2,0])).magnitude;
+				float sy = (new Vector3(matrix[0,1],matrix[1,1],matrix[2,1])).magnitude;
+				float sz = (new Vector3(matrix[0,2],matrix[1,2],matrix[2,2])).magnitude;
+
 				bones[i].localScale = new Vector3(sx,sy,sz);
 			}
 			
@@ -77,10 +96,16 @@ class ImportSkl : ScriptableWizard
 			}
 			
 			mesh.bindposes = bindPoses;
-			
-			SkinnedMeshRenderer renderer = go.AddComponent<SkinnedMeshRenderer>();
+
+			GameObject rendererObj = new GameObject("renderer");
+			rendererObj.transform.parent = go.transform;
+
+			SkinnedMeshRenderer renderer = rendererObj.AddComponent<SkinnedMeshRenderer>();
 			renderer.bones = bones;
 			renderer.sharedMesh = mesh;
+			if(rootBone != null) {
+				renderer.rootBone = rootBone;
+			}
 			
 			
 		}
@@ -167,15 +192,20 @@ class ImportSkn : ScriptableWizard
 				Vector3[] normals = new Vector3[numVertices];
 
 				byte[] vertexBlock = new byte[52];
+
+				//for debugging
+				//System.Collections.Generic.Dictionary<int,int> boneIdxNums = new System.Collections.Generic.Dictionary<int, int>();
+				////
+
 				for(int i=0;i<numVertices;i++) {
 					fs.Read (vertexBlock,0,52);
 					float x = BitConverter.ToSingle(vertexBlock,0);
 					float y = BitConverter.ToSingle(vertexBlock,4);
 					float z = BitConverter.ToSingle(vertexBlock,8);
-					char boneIdx0 = BitConverter.ToChar(vertexBlock,12);
-					char boneIdx1 = BitConverter.ToChar(vertexBlock,13);
-					char boneIdx2 = BitConverter.ToChar(vertexBlock,14);
-					char boneIdx3 = BitConverter.ToChar(vertexBlock,15);
+					int boneIdx0 = (int)vertexBlock[12];
+					int boneIdx1 = (int)vertexBlock[13];
+					int boneIdx2 = (int)vertexBlock[14];
+					int boneIdx3 = (int)vertexBlock[15];
 					float boneWeight0 = BitConverter.ToSingle(vertexBlock,16);
 					float boneWeight1 = BitConverter.ToSingle(vertexBlock,20);
 					float boneWeight2 = BitConverter.ToSingle(vertexBlock,24);
@@ -189,6 +219,20 @@ class ImportSkn : ScriptableWizard
 					float v = 1-BitConverter.ToSingle(vertexBlock,48);
 
 
+					//////basic skin blitzcrank bone idx matching error temporary fix
+					if(boneIdx0 >= 22) {
+						boneIdx0 +=2;
+					}
+					if(boneIdx1 >= 22) {
+						boneIdx1 +=2;
+					}
+					if(boneIdx2 >= 22) {
+						boneIdx2 += 2;
+					}
+					if(boneIdx3 >= 22) {
+						boneIdx3 += 2;
+					}
+					//////////
 
 					vertices[i] = new Vector3(x,y,z);
 					boneWeights[i].boneIndex0 = (int)boneIdx0;
@@ -202,9 +246,50 @@ class ImportSkn : ScriptableWizard
 					normals[i] = new Vector3(normalX,normalY,normalZ);
 					uv[i] = new Vector2(u,v);
 
+					//for debugging
+					/*
+					if(boneWeight0 > 0) {
+						if(boneIdxNums.ContainsKey(boneIdx0)) {
+							boneIdxNums[boneIdx0] = boneIdxNums[boneIdx0]+1;
+						} else {
+							boneIdxNums.Add (boneIdx0,1);
+						}
+					} 
+					if(boneWeight1 > 0) {
+						if(boneIdxNums.ContainsKey(boneIdx1)) {
+							boneIdxNums[boneIdx1] = boneIdxNums[boneIdx1]+1;
+						} else {
+							boneIdxNums.Add (boneIdx1,1);
+						}
+					}
+					if(boneWeight2 > 0) {
+						if(boneIdxNums.ContainsKey(boneIdx2)) {
+							boneIdxNums[boneIdx2] = boneIdxNums[boneIdx2]+1;
+						} else {
+							boneIdxNums.Add (boneIdx2,1);
+						}
+					}
+					if(boneWeight3 > 0) {
+						if(boneIdxNums.ContainsKey(boneIdx3)) {
+							boneIdxNums[boneIdx3] = boneIdxNums[boneIdx3]+1;
+						} else {
+							boneIdxNums.Add (boneIdx3,1);
+						}
+					}*/
+					///////
+
+
 				}
+				///////for debugging
+				/*System.Text.StringBuilder sb = new System.Text.StringBuilder();
 
-
+				System.Collections.Generic.List<int> keys = new System.Collections.Generic.List<int>(boneIdxNums.Keys);
+				keys.Sort ();
+				foreach(int idx in keys) {
+					sb.Append (string.Format ("idx {0} : {1}\n",idx,boneIdxNums[idx]));
+				}
+				Debug.Log(sb.ToString());*/
+				///////
 				mesh = new Mesh();
 				mesh.vertices = vertices;
 				mesh.uv = uv;
