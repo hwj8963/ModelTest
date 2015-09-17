@@ -1,0 +1,20 @@
+bone 49
+id 33
+
+header 64
+bone 100 * 49 
+
+
+bonedata offset : 64
+
+bone id map offset : 4964
+ = 49 * 8
+bone id remapping offset : 5356
+ = 
+offset2 : 5424
+
+offset3 : 5428
+
+offsetToStrings : 5432
+
+length 6140

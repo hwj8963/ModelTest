@@ -140,13 +140,165 @@ class ImportAnm : ScriptableWizard
 	}
 }
 
+class ImportSklVer0 : ScriptableWizard
+{
+    public UnityEngine.Object sklFile;
+    public Mesh mesh;
+    public string name;
+    [MenuItem("Custom/LOL/Import Skl(Version 0)")]
+    static void CreateWizard()
+    {
+        ScriptableWizard.DisplayWizard<ImportSklVer0>("Import Skl", "Import");
+    }
+    void OnWizardCreate()
+    {
+        if (sklFile == null)
+        {
+            Debug.LogError("null skl file");
+            return;
+        }
+
+        GameObject go = new GameObject(name);
+
+        string sklPath = AssetDatabase.GetAssetPath(sklFile);
+        using (FileStream fs = File.OpenRead(sklPath))
+        {
+            byte[] headerBlock = new byte[64];
+            fs.Read(headerBlock, 0, 64);
+            int version = BitConverter.ToInt32(headerBlock, 8);
+            int numBones = (int)BitConverter.ToInt16(headerBlock, 14);
+            int numBoneIDs = BitConverter.ToInt32(headerBlock, 16);
+            int offsetVertexData = (int)BitConverter.ToInt16(headerBlock, 20);
+            int offset1 = (int)BitConverter.ToInt32(headerBlock, 24);
+            int offsetToanimationIdices = BitConverter.ToInt32(headerBlock, 28);
+            int offset2 = BitConverter.ToInt32(headerBlock, 32);
+            int offset3 = BitConverter.ToInt32(headerBlock, 36);
+            int offsetToStrings = BitConverter.ToInt32(headerBlock, 40);
+
+
+            Transform[] bones = new Transform[numBones];
+            for (int i = 0; i < numBones; i++)
+            {
+                bones[i] = new GameObject().transform;
+            }
+
+            fs.Position = offsetVertexData;
+            byte[] boneBlock = new byte[100];
+            for (int i = 0; i < numBones; i++)
+            {
+                fs.Read(boneBlock, 0, 100);
+                int id = (int)BitConverter.ToInt16(boneBlock, 2);
+                int parent = (int)BitConverter.ToInt16(boneBlock, 4);
+                int nameHash = BitConverter.ToInt32(boneBlock, 8);
+                float f21 = BitConverter.ToSingle(boneBlock, 12);
+
+                float px = BitConverter.ToSingle(boneBlock, 16);
+                float py = BitConverter.ToSingle(boneBlock, 20);
+                float pz = BitConverter.ToSingle(boneBlock, 24);
+
+                float sx = BitConverter.ToSingle(boneBlock, 28);
+                float sy = BitConverter.ToSingle(boneBlock, 32);
+                float sz = BitConverter.ToSingle(boneBlock, 36);
+
+                float rx = BitConverter.ToSingle(boneBlock, 40);
+                float ry = BitConverter.ToSingle(boneBlock, 44);
+                float rz = BitConverter.ToSingle(boneBlock, 48);
+                float rw = BitConverter.ToSingle(boneBlock, 52);
+                
+
+
+                bones[i].parent = parent >= 0 ? bones[parent] : go.transform;
+                bones[i].position = new Vector3(px, py, pz);
+                bones[i].localScale = new Vector3(sx, sy, sz);
+                bones[i].rotation = new Quaternion(rx, ry, rz, rw);
+
+                //Debug.Log("id : " + id + " parent : " + parent + " namehash : " + nameHash + " f21 : " + f21 + "\nposition : (" + px + "," + py + "," + pz + ")\n" + "scale : (" + sx + "," + sy + "," + sz + ")\n");
+            }
+            /*
+            fs.Position = offset1;
+            byte[] boneMapBlock = new byte[8];
+            for (int i = 0; i < numBones; i++)
+            {
+                fs.Read(boneMapBlock, 0, 8);
+                int i1 = BitConverter.ToInt32(boneMapBlock, 0);
+                int i2 = BitConverter.ToInt32(boneMapBlock, 4);
+                //Debug.Log("i : " + i + " i1 : " + i1 + " i2 : " + i2);
+            }*/
+
+            Transform[] bones2 = new Transform[numBoneIDs];
+
+            fs.Position = offsetToanimationIdices;
+            byte[] boneIdBlock = new byte[2];
+            for (int i = 0; i < numBoneIDs; i++)
+            {
+                fs.Read(boneIdBlock, 0, 2);
+                int idx = BitConverter.ToInt16(boneIdBlock, 0);
+                bones2[i] = bones[idx];
+            }
+
+            fs.Position = offsetToStrings;
+            int namesLength = (int)(fs.Length - fs.Position);
+            byte[] namesBlock = new byte[namesLength];
+            fs.Read(namesBlock, 0, namesLength);
+
+            int offset = 0;
+            for (int i = 0; i < numBones; i++)
+            {
+                while (namesBlock[offset] == '\0')
+                {
+                    offset++;
+                }
+                int startOffset = offset;
+                while (namesBlock[offset] != '\0') {
+                    offset++;
+                }
+                int endOffset = offset;
+                bones[i].gameObject.name = System.Text.Encoding.ASCII.GetString(namesBlock, startOffset, endOffset - startOffset);             
+                //Debug.Log("name_" + i + " : " + names[i]);
+            }
+
+
+            Matrix4x4[] bindPoses = new Matrix4x4[numBoneIDs];
+            for (int i = 0; i < numBoneIDs; i++)
+            {
+                bindPoses[i] = bones2[i].worldToLocalMatrix * go.transform.localToWorldMatrix;
+            }
+
+            mesh.bindposes = bindPoses;
+
+            GameObject rendererObj = new GameObject("renderer");
+            rendererObj.transform.parent = go.transform;
+
+            SkinnedMeshRenderer renderer = rendererObj.AddComponent<SkinnedMeshRenderer>();
+            renderer.bones = bones2;
+            renderer.sharedMesh = mesh;
+
+            Transform rootBone = null;
+            for(int i=0;i<numBones;i++)
+            {
+                if (bones[i].gameObject.name == "root" && bones[i].parent == go.transform)
+                {
+                    rootBone = bones[i];
+                    break;
+                }
+
+            }
+            if (rootBone != null)
+            {
+                renderer.rootBone = rootBone;
+            }
+
+        }
+        
+    }
+}
 
 class ImportSkl : ScriptableWizard
 {
 	public UnityEngine.Object sklFile;
 	public Mesh mesh;
 	public string name;
-	[MenuItem("Custom/LOL/Import Skl")]
+	[MenuItem("Custom/LOL/Import Skl(Version 1,2)")]
 	static void CreateWizard() {
 		ScriptableWizard.DisplayWizard<ImportSkl> ("Import Skl", "Import");
 
