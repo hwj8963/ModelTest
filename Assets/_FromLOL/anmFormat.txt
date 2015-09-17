@@ -1,0 +1,48 @@
+
+HeaderBlock 28 byte (0~28)
+
+id : 8byte
+version : 4byte
+??? : 4byte
+numOfBones(guess) : 4byte = 46
+numOfFrames(guess) : 4byte = 28
+playbackFPS(guess) : 4byte = 31
+
+
+
+boneBlock 36byte + 28byte(size of frame block) * numOfFrames
+boneName : 32byte
+??? : 4byte
+content : frameBlock * numOfFrames
+
+
+frameBlock : 28byte 
+rotation x : 4 byte
+rotation y : 4 byte
+rotation z : 4 byte
+rotation w : 4 byte
+position x : 4 byte
+position y : 4 byte 
+position z : 4 byte
+
+1 bone : 820byte
+
+boneName : 32byte (28~60) = root
+??? : 4byte = 3 (60~64)
+content : 784byte (60~848) 
+          784 = 28*28
+			
+			
+boneName : 32byte (848~880) = spine
+??? : 4byte = 0 (880~884)
+content : 784byte (884~1668)
+
+boneName : 32byte (1668~1700) = neck
+??? : 4byte = 0 (1700~1704)
+content : 784byte (1704~2488)
+
+boneblock (2488~3318) = head
+
+
+boneBlock 의 크기 = 36 + numOfFrames * 28byte
+boneBlock 이 numOfBones 개만큼 붙는다.
