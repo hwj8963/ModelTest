@@ -41,7 +41,7 @@ class ImportAnm : ScriptableWizard
 			return;
 		}
 
-		try {
+		//try {
 			AnimationClip clip = new AnimationClip();
 
 			string anmPath = AssetDatabase.GetAssetPath (anmFile);
@@ -53,11 +53,14 @@ class ImportAnm : ScriptableWizard
 				foreach(Transform child in children) {
 					Transform cur = child;
 					string path = child.name;
+                    
 					while(cur != null && cur.parent != obj && cur.parent != null) {
 						cur = cur.parent;
 						path = cur.name + "/" + path;
 					}
-					nameToPath.Add (child.name,path);
+                Debug.Log(child.name);
+                nameToPath.Add (child.name,path);
+                  
 				}
 
 			}
@@ -134,9 +137,9 @@ class ImportAnm : ScriptableWizard
 				AssetDatabase.CreateAsset(clip,"Assets/CreatedAsset/"+name+".anim");
 
 			}
-		} catch (Exception e) {
-			Debug.LogError(e);
-		}
+		//} catch (Exception e) {
+		//	Debug.LogError(e);
+		//}
 	}
 }
 
@@ -192,6 +195,7 @@ class ImportSklVer0 : ScriptableWizard
                 int nameHash = BitConverter.ToInt32(boneBlock, 8);
                 float f21 = BitConverter.ToSingle(boneBlock, 12);
 
+                
                 float px = BitConverter.ToSingle(boneBlock, 16);
                 float py = BitConverter.ToSingle(boneBlock, 20);
                 float pz = BitConverter.ToSingle(boneBlock, 24);
@@ -204,15 +208,29 @@ class ImportSklVer0 : ScriptableWizard
                 float ry = BitConverter.ToSingle(boneBlock, 44);
                 float rz = BitConverter.ToSingle(boneBlock, 48);
                 float rw = BitConverter.ToSingle(boneBlock, 52);
+                /*
+                float px = BitConverter.ToSingle(boneBlock, 56);
+                float py = BitConverter.ToSingle(boneBlock, 60);
+                float pz = BitConverter.ToSingle(boneBlock, 64);
+                */
                 
+                float[] extras = new float[11];
+                for (int k = 0; k < 11; k++) {
+                    extras[k] = BitConverter.ToSingle(boneBlock, 56 + k * 4);
+                }
 
+            
 
                 bones[i].parent = parent >= 0 ? bones[parent] : go.transform;
-                bones[i].position = new Vector3(px, py, pz);
+                //bones[i].parent = go.transform;
+                bones[i].localPosition = new Vector3(px, py, pz);
                 bones[i].localScale = new Vector3(sx, sy, sz);
-                bones[i].rotation = new Quaternion(rx, ry, rz, rw);
+                bones[i].localRotation = new Quaternion(rx, ry, rz, rw);
+                //bones[i].position = new Vector3(extras[0], extras[1], extras[2]);
+                //bones[i].rotation = new Quaternion(extras[6], extras[7], extras[8], extras[9]);
+                //Debug.Log("id : " + id + " parent : " + parent + " namehash : " + nameHash + " f21 : " + f21 + "\nposition : (" + px + "," + py + "," + pz + ")\n" +
+                    //"scale : (" + sx + "," + sy + "," + sz + ")\nrotation : (" + rx + "," + ry + "," + rz + "," + rw +")");
 
-                //Debug.Log("id : " + id + " parent : " + parent + " namehash : " + nameHash + " f21 : " + f21 + "\nposition : (" + px + "," + py + "," + pz + ")\n" + "scale : (" + sx + "," + sy + "," + sz + ")\n");
             }
             /*
             fs.Position = offset1;
