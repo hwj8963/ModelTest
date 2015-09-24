@@ -15,6 +15,8 @@ public class Grab : MonoBehaviour {
     public Grabbable grabbedObj { get; private set; }
     public Transform grabbedTm { get; private set; }
 
+    GameObject HitParticle;
+
     Player player;
     // Use this for initialization
     void Start() {
@@ -22,6 +24,14 @@ public class Grab : MonoBehaviour {
         grabbedObj = null;
 
         player = FindObjectOfType<Player>();
+        HitParticle = Resources.Load("Particles/HitEnemyParticle") as GameObject;
+    }
+
+    void OnDestroy()
+    {
+        player = null;
+        HitParticle = null;
+
     }
 
     // Update is called once per frame
@@ -67,6 +77,8 @@ public class Grab : MonoBehaviour {
 
         GameManager.Instance.AddScore(grabbedObj.score());
         GameManager.Instance.AddTime(grabbedObj.addTime());
-        
+
+
+        Instantiate(HitParticle);
     }
 }

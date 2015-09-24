@@ -83,7 +83,7 @@ public class GameManager : MonoBehaviour {
         }
     }
 
-    public static readonly float TimeMax = 30f;
+    public static readonly float TimeMax = 20f;
 
     public float RemainTime
     {

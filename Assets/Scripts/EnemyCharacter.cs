@@ -7,6 +7,10 @@ public class EnemyCharacter : MonoBehaviour,Grabbable {
 	
 	bool grabbed = false;
 	Animator anim = null;
+
+    public Transform rootTm;
+
+    public GameObject grabParticle;
 	// Use this for initialization
 	void Start() {
 		anim = this.GetComponent<Animator> ();
@@ -15,7 +19,8 @@ public class EnemyCharacter : MonoBehaviour,Grabbable {
 	void OnSpawned()
 	{
 		grabbed = false;
-		if (transform.position.x < 0) {
+        grabParticle.SetActive(false);
+        if (transform.position.x < 0) {
 			speed = 350;
 		} else
 		{
@@ -56,7 +61,8 @@ public class EnemyCharacter : MonoBehaviour,Grabbable {
 	//implement of Grapable start
 	public void Grap() {
 		grabbed = true;
-		if (anim != null) {
+        grabParticle.SetActive(true);
+        if (anim != null) {
 			anim.enabled = false;
 		}
 
@@ -67,7 +73,7 @@ public class EnemyCharacter : MonoBehaviour,Grabbable {
 	}
     public float addTime()
     {
-        return 3f;
+        return 1.5f;
     }
     //implement of Grapable end
 

@@ -21,14 +21,11 @@ public class UIManager : MonoBehaviour {
 
     void Update()
     {
-        //UpdateScore();
+        UpdateScore();
         UpdateTime();
     }
 
-    public void SetScore(int score)
-    {
-        ScoreLabel.text = string.Format("{0:000000}", score);
-    }
+   
     public void UpdateTime() {
         TimeBar.value = GameManager.Instance.RemainTime / GameManager.TimeMax;
     }
@@ -40,16 +37,26 @@ public class UIManager : MonoBehaviour {
 
         GameOverObject.SetActive(true);
     }
-
     /*
+    public void SetScore(int score)
+    {
+        ScoreLabel.text = string.Format("{0:000000}", score);
+    }*/
 
     int targetScore = 0; // 실제 점수 값.
-    int showScore = 0; // 화면상에 보여지고 있는 값.
+    float showScore = 0; // 화면상에 보여지고 있는 값.
     float remainTime = 0f;
     public void SetScore(int score)
     {
         targetScore = score;
         remainTime = 0.5f;
+    }
+    public void SetScoreImmediatly(int score)
+    {
+        targetScore = score;
+        showScore = score;
+        remainTime = 0f;
+        ScoreLabel.text = string.Format("{0:000000}", score);
     }
     void UpdateScore()
     {
@@ -59,22 +66,22 @@ public class UIManager : MonoBehaviour {
             float delta = Time.deltaTime;
             if(remainTime > delta)
             {
-                showScore = (int)((targetScore - showScore) * delta / remainTime + showScore);
+                showScore = (targetScore - showScore) * delta / remainTime + showScore;
                 remainTime -= delta;
             } else
             {
                 remainTime = 0f;
                 showScore = targetScore;
             }
-            ScoreLabel.text = showScore.ToString();
+            ScoreLabel.text = string.Format("{0:000000}", (int)showScore);
 
         }
-    }*/
+    }
 
     public void OnClickedRestartBtn()
     {
         GameOverObject.SetActive(false);
-        SetScore(0);
+        SetScoreImmediatly(0);
         GameManager.Instance.Restart();
     }
 }
