@@ -64,5 +64,9 @@ public class Grab : MonoBehaviour {
         Rigidbody rigidbody = grabbedTm.GetComponent<Rigidbody>();
         rigidbody.angularVelocity = new Vector3(0f,0f, Random.Range(-540f, 540f));
         rigidbody.velocity = new Vector3(Random.Range(-500f, 500f), Random.Range(700f, 800f), 0f);
+
+        GameManager.Instance.AddScore(grabbedObj.score());
+        GameManager.Instance.AddTime(grabbedObj.addTime());
+        
     }
 }

@@ -445,9 +445,9 @@ GameObject:
   m_Component:
   - 4: {fileID: 468978}
   - 95: {fileID: 9581288}
-  - 114: {fileID: 11456978}
   - 54: {fileID: 5498770}
   - 65: {fileID: 6589406}
+  - 114: {fileID: 11480874}
   m_Layer: 9
   m_Name: ashe
   m_TagString: EnemyCharacter
@@ -2484,7 +2484,7 @@ Animator:
   m_WarningMessage: 
   m_HasTransformHierarchy: 1
   m_AllowConstantClipSamplingOptimization: 1
---- !u!114 &11456978
+--- !u!114 &11480874
 MonoBehaviour:
   m_ObjectHideFlags: 1
   m_PrefabParentObject: {fileID: 0}
@@ -2492,11 +2492,10 @@ MonoBehaviour:
   m_GameObject: {fileID: 128216}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9df1bc1b0350b5e4b8a1887b95176b6b, type: 3}
+  m_Script: {fileID: 11500000, guid: c471cc745c2d5416d9795fced0f7186b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  speed: 200
-  grabbed: 0
+  speed: 50
 --- !u!137 &13708406
 SkinnedMeshRenderer:
   m_ObjectHideFlags: 1
