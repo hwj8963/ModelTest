@@ -3,9 +3,9 @@ using System.Collections;
 
 public class EnemyMinion : MonoBehaviour, Grabbable {
 
-    public int speed = 50;
+    int speed = 50;
 
-    public bool grabbed = false;
+    bool grabbed = false;
     // Use this for initialization
     void Start() {
     }
