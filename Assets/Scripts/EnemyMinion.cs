@@ -1,65 +1,13 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public class EnemyMinion : MonoBehaviour, Grabbable {
-
-    int speed = 50;
-
-    bool grabbed = false;
-    // Use this for initialization
-    void Start() {
-    }
-
-    void OnSpawned()
+public class EnemyMinion : EnemyBase {
+    protected override void Init()
     {
-        grabbed = false;
-        if (transform.position.x < 0) {
-            speed = Random.Range(160, 180);
-        } else
-        {
-            speed = -Random.Range(160, 180);
-        }
-
-        Rigidbody rigidbody = this.GetComponent<Rigidbody>();
-        rigidbody.velocity = Vector3.zero;
-        rigidbody.angularVelocity = Vector3.zero;
+        base.Init();
+        speedMin = 160;
+        speedMax = 180;
+        Score = 10;
+        AddTime = 0f;
     }
-
-    // Update is called once per frame
-    void Update() {
-
-        Vector3 position = transform.position;
-
-        if (position.x < -700 || position.x > 700 || position.y > 700)
-        {
-            Despawn();
-        }
-        if (!grabbed)
-        {   
-            position.x += speed * Time.deltaTime;
-            transform.position = position;
-        }
-        
-    }
-    void Despawn()
-    {
-        GameManager.Instance.EnemyPool.Despawn(this.gameObject);
-    }
-
-
-
-    //implement of Grapable start
-    public void Grap() {
-        grabbed = true;
-    }
-    public int score()
-    {
-        return 10;
-    }
-    public float addTime()
-    {
-        return 0f;
-    }
-    //implement of Grapable end
-
 }

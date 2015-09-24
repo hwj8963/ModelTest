@@ -46,7 +46,7 @@ public class Grab : MonoBehaviour {
             grabbedTm = collider.transform;
             grabbedTm.parent = this.transform;
             //grabbedTm.transform.position = this.transform.position;
-            obj.Grap();
+            obj.Grab();
             this.state = State.Grabbed;
             player.Grabbed();
         }
