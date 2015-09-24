@@ -1,0 +1,2 @@
+https://code.google.com/p/lolblender/wiki/fileFormats
+https://github.com/lispascal/lolblender/wiki/LoL-Skeleton-File-Format-(.SKL)

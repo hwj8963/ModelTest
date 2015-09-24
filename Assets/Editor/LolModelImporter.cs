@@ -41,7 +41,7 @@ class ImportAnm : ScriptableWizard
 			return;
 		}
 
-		try {
+		//try {
 			AnimationClip clip = new AnimationClip();
 
 			string anmPath = AssetDatabase.GetAssetPath (anmFile);
@@ -53,11 +53,14 @@ class ImportAnm : ScriptableWizard
 				foreach(Transform child in children) {
 					Transform cur = child;
 					string path = child.name;
+                    
 					while(cur != null && cur.parent != obj && cur.parent != null) {
 						cur = cur.parent;
 						path = cur.name + "/" + path;
 					}
-					nameToPath.Add (child.name,path);
+                Debug.Log(child.name);
+                nameToPath.Add (child.name,path);
+                  
 				}
 
 			}
@@ -134,19 +137,186 @@ class ImportAnm : ScriptableWizard
 				AssetDatabase.CreateAsset(clip,"Assets/CreatedAsset/"+name+".anim");
 
 			}
-		} catch (Exception e) {
-			Debug.LogError(e);
-		}
+		//} catch (Exception e) {
+		//	Debug.LogError(e);
+		//}
 	}
 }
 
+class ImportSklVer0 : ScriptableWizard
+{
+    public UnityEngine.Object sklFile;
+    public Mesh mesh;
+    public string name;
+    [MenuItem("Custom/LOL/Import Skl(Version 0)")]
+    static void CreateWizard()
+    {
+        ScriptableWizard.DisplayWizard<ImportSklVer0>("Import Skl", "Import");
+    }
+    void OnWizardCreate()
+    {
+        if (sklFile == null)
+        {
+            Debug.LogError("null skl file");
+            return;
+        }
+
+        GameObject go = new GameObject(name);
+
+        string sklPath = AssetDatabase.GetAssetPath(sklFile);
+        using (FileStream fs = File.OpenRead(sklPath))
+        {
+            byte[] headerBlock = new byte[64];
+            fs.Read(headerBlock, 0, 64);
+            int version = BitConverter.ToInt32(headerBlock, 8);
+            int numBones = (int)BitConverter.ToInt16(headerBlock, 14);
+            int numBoneIDs = BitConverter.ToInt32(headerBlock, 16);
+            int offsetVertexData = (int)BitConverter.ToInt16(headerBlock, 20);
+            int offset1 = (int)BitConverter.ToInt32(headerBlock, 24);
+            int offsetToanimationIdices = BitConverter.ToInt32(headerBlock, 28);
+            int offset2 = BitConverter.ToInt32(headerBlock, 32);
+            int offset3 = BitConverter.ToInt32(headerBlock, 36);
+            int offsetToStrings = BitConverter.ToInt32(headerBlock, 40);
+
+
+            Transform[] bones = new Transform[numBones];
+            for (int i = 0; i < numBones; i++)
+            {
+                bones[i] = new GameObject().transform;
+            }
+
+            fs.Position = offsetVertexData;
+            byte[] boneBlock = new byte[100];
+            for (int i = 0; i < numBones; i++)
+            {
+                fs.Read(boneBlock, 0, 100);
+                int id = (int)BitConverter.ToInt16(boneBlock, 2);
+                int parent = (int)BitConverter.ToInt16(boneBlock, 4);
+                int nameHash = BitConverter.ToInt32(boneBlock, 8);
+                float f21 = BitConverter.ToSingle(boneBlock, 12);
+
+                
+                float px = BitConverter.ToSingle(boneBlock, 16);
+                float py = BitConverter.ToSingle(boneBlock, 20);
+                float pz = BitConverter.ToSingle(boneBlock, 24);
+
+                float sx = BitConverter.ToSingle(boneBlock, 28);
+                float sy = BitConverter.ToSingle(boneBlock, 32);
+                float sz = BitConverter.ToSingle(boneBlock, 36);
+
+                float rx = BitConverter.ToSingle(boneBlock, 40);
+                float ry = BitConverter.ToSingle(boneBlock, 44);
+                float rz = BitConverter.ToSingle(boneBlock, 48);
+                float rw = BitConverter.ToSingle(boneBlock, 52);
+                /*
+                float px = BitConverter.ToSingle(boneBlock, 56);
+                float py = BitConverter.ToSingle(boneBlock, 60);
+                float pz = BitConverter.ToSingle(boneBlock, 64);
+                */
+                
+                float[] extras = new float[11];
+                for (int k = 0; k < 11; k++) {
+                    extras[k] = BitConverter.ToSingle(boneBlock, 56 + k * 4);
+                }
+
+            
+
+                bones[i].parent = parent >= 0 ? bones[parent] : go.transform;
+                //bones[i].parent = go.transform;
+                bones[i].localPosition = new Vector3(px, py, pz);
+                bones[i].localScale = new Vector3(sx, sy, sz);
+                bones[i].localRotation = new Quaternion(rx, ry, rz, rw);
+                //bones[i].position = new Vector3(extras[0], extras[1], extras[2]);
+                //bones[i].rotation = new Quaternion(extras[6], extras[7], extras[8], extras[9]);
+                //Debug.Log("id : " + id + " parent : " + parent + " namehash : " + nameHash + " f21 : " + f21 + "\nposition : (" + px + "," + py + "," + pz + ")\n" +
+                    //"scale : (" + sx + "," + sy + "," + sz + ")\nrotation : (" + rx + "," + ry + "," + rz + "," + rw +")");
+
+            }
+            /*
+            fs.Position = offset1;
+            byte[] boneMapBlock = new byte[8];
+            for (int i = 0; i < numBones; i++)
+            {
+                fs.Read(boneMapBlock, 0, 8);
+                int i1 = BitConverter.ToInt32(boneMapBlock, 0);
+                int i2 = BitConverter.ToInt32(boneMapBlock, 4);
+                //Debug.Log("i : " + i + " i1 : " + i1 + " i2 : " + i2);
+            }*/
+
+            Transform[] bones2 = new Transform[numBoneIDs];
+
+            fs.Position = offsetToanimationIdices;
+            byte[] boneIdBlock = new byte[2];
+            for (int i = 0; i < numBoneIDs; i++)
+            {
+                fs.Read(boneIdBlock, 0, 2);
+                int idx = BitConverter.ToInt16(boneIdBlock, 0);
+                bones2[i] = bones[idx];
+            }
+
+            fs.Position = offsetToStrings;
+            int namesLength = (int)(fs.Length - fs.Position);
+            byte[] namesBlock = new byte[namesLength];
+            fs.Read(namesBlock, 0, namesLength);
+
+            int offset = 0;
+            for (int i = 0; i < numBones; i++)
+            {
+                while (namesBlock[offset] == '\0')
+                {
+                    offset++;
+                }
+                int startOffset = offset;
+                while (namesBlock[offset] != '\0') {
+                    offset++;
+                }
+                int endOffset = offset;
+                bones[i].gameObject.name = System.Text.Encoding.ASCII.GetString(namesBlock, startOffset, endOffset - startOffset);             
+                //Debug.Log("name_" + i + " : " + names[i]);
+            }
+
+
+            Matrix4x4[] bindPoses = new Matrix4x4[numBoneIDs];
+            for (int i = 0; i < numBoneIDs; i++)
+            {
+                bindPoses[i] = bones2[i].worldToLocalMatrix * go.transform.localToWorldMatrix;
+            }
+
+            mesh.bindposes = bindPoses;
+
+            GameObject rendererObj = new GameObject("renderer");
+            rendererObj.transform.parent = go.transform;
+
+            SkinnedMeshRenderer renderer = rendererObj.AddComponent<SkinnedMeshRenderer>();
+            renderer.bones = bones2;
+            renderer.sharedMesh = mesh;
+
+            Transform rootBone = null;
+            for(int i=0;i<numBones;i++)
+            {
+                if (bones[i].gameObject.name == "root" && bones[i].parent == go.transform)
+                {
+                    rootBone = bones[i];
+                    break;
+                }
+
+            }
+            if (rootBone != null)
+            {
+                renderer.rootBone = rootBone;
+            }
+
+        }
+        
+    }
+}
 
 class ImportSkl : ScriptableWizard
 {
 	public UnityEngine.Object sklFile;
 	public Mesh mesh;
 	public string name;
-	[MenuItem("Custom/LOL/Import Skl")]
+	[MenuItem("Custom/LOL/Import Skl(Version 1,2)")]
 	static void CreateWizard() {
 		ScriptableWizard.DisplayWizard<ImportSkl> ("Import Skl", "Import");
 
@@ -162,74 +332,109 @@ class ImportSkl : ScriptableWizard
 		GameObject go = new GameObject(name);
 		
 		string sklPath = AssetDatabase.GetAssetPath(sklFile);
-		using(FileStream fs = File.OpenRead (sklPath)) {
-			byte[] headerBlock = new byte[20];
-			fs.Read(headerBlock,0,20);
-			string version = System.Text.Encoding.ASCII.GetString (headerBlock,0,8).TrimEnd('\0');
-			int numObjects = BitConverter.ToInt32(headerBlock,8);
-			int skeletonHash = BitConverter.ToInt32 (headerBlock,12);
-			int numElements = BitConverter.ToInt32 (headerBlock,16);
-			
-			Transform[] bones = new Transform[numElements];
-			for(int i=0;i<numElements;i++) {
-				bones[i] = new GameObject().transform;
-			}
-			
-			byte[] boneBlock = new byte[88];
-			Transform rootBone = null;
-			for(int i=0;i<numElements;i++) {
-				fs.Read (boneBlock,0,88);
-				string boneName = System.Text.Encoding.ASCII.GetString (boneBlock,0,32).TrimEnd('\0');
+        using (FileStream fs = File.OpenRead(sklPath))
+        {
+            byte[] headerBlock = new byte[20];
+            fs.Read(headerBlock, 0, 20);
+            string magic = System.Text.Encoding.ASCII.GetString(headerBlock, 0, 8).TrimEnd('\0');
+            int version = BitConverter.ToInt32(headerBlock, 8);
+            int skeletonHash = BitConverter.ToInt32(headerBlock, 12);
+            int numElements = BitConverter.ToInt32(headerBlock, 16);
+
+            Transform[] bones = new Transform[numElements];
+            for (int i = 0; i < numElements; i++)
+            {
+                bones[i] = new GameObject().transform;
+            }
+
+            byte[] boneBlock = new byte[88];
+            Transform rootBone = null;
+            for (int i = 0; i < numElements; i++)
+            {
+                fs.Read(boneBlock, 0, 88);
+                string boneName = System.Text.Encoding.ASCII.GetString(boneBlock, 0, 32).TrimEnd('\0');
 
 
 
-				int parent = BitConverter.ToInt32 (boneBlock,32);
-				float scale = BitConverter.ToSingle (boneBlock,36);
-				float[,] matrix = new float[3,4];
-				for(int n=0;n<3;n++) { 
-					for(int m=0;m<4;m++) {
-						matrix[n,m] = BitConverter.ToSingle(boneBlock,40 + n*16 + m*4);
-					}
-				}
+                int parent = BitConverter.ToInt32(boneBlock, 32);
+                float scale = BitConverter.ToSingle(boneBlock, 36);
+                float[,] matrix = new float[3, 4];
+                for (int n = 0; n < 3; n++)
+                {
+                    for (int m = 0; m < 4; m++)
+                    {
+                        matrix[n, m] = BitConverter.ToSingle(boneBlock, 40 + n * 16 + m * 4);
+                    }
+                }
 
 
-			
-				bones[i].gameObject.name = boneName;
-				bones[i].parent = parent>=0?bones[parent]:go.transform;
+
+                bones[i].gameObject.name = boneName;
+                bones[i].parent = parent >= 0 ? bones[parent] : go.transform;
 
 
-				if(boneName == "root" && parent<0) {
-					rootBone = bones[i];
-				}
+                if (boneName == "root" && parent < 0)
+                {
+                    rootBone = bones[i];
+                }
 
 
-				bones[i].position = new Vector3(matrix[0,3],matrix[1,3],matrix[2,3]);
+                bones[i].position = new Vector3(matrix[0, 3], matrix[1, 3], matrix[2, 3]);
 
 
-				//bones[i].localRotation = new Quaternion(qx,qy,qz,qw);
-				
-				Quaternion q = new Quaternion();
-				q.w = Mathf.Sqrt (Mathf.Max(0,1+matrix[0,0]+matrix[1,1]+matrix[2,2]))/2f;
-				q.x = Mathf.Sqrt (Mathf.Max (0,1+matrix[0,0]-matrix[1,1]-matrix[2,2]))/2f;
-				q.y = Mathf.Sqrt (Mathf.Max (0,1-matrix[0,0]+matrix[1,1]-matrix[2,2]))/2f;
-				q.z = Mathf.Sqrt (Mathf.Max (0,1-matrix[0,0]-matrix[1,1]+matrix[2,2]))/2f;
-				q.x *= Mathf.Sign(q.x * (matrix[2,1]-matrix[1,2]));
-				q.y *= Mathf.Sign (q.y * (matrix[0,2] - matrix[2,0]));
-				q.z *= Mathf.Sign (q.z * (matrix[1,0] - matrix[0,1]));
+                //bones[i].localRotation = new Quaternion(qx,qy,qz,qw);
 
-				bones[i].rotation = q;
+                Quaternion q = new Quaternion();
+                q.w = Mathf.Sqrt(Mathf.Max(0, 1 + matrix[0, 0] + matrix[1, 1] + matrix[2, 2])) / 2f;
+                q.x = Mathf.Sqrt(Mathf.Max(0, 1 + matrix[0, 0] - matrix[1, 1] - matrix[2, 2])) / 2f;
+                q.y = Mathf.Sqrt(Mathf.Max(0, 1 - matrix[0, 0] + matrix[1, 1] - matrix[2, 2])) / 2f;
+                q.z = Mathf.Sqrt(Mathf.Max(0, 1 - matrix[0, 0] - matrix[1, 1] + matrix[2, 2])) / 2f;
+                q.x *= Mathf.Sign(q.x * (matrix[2, 1] - matrix[1, 2]));
+                q.y *= Mathf.Sign(q.y * (matrix[0, 2] - matrix[2, 0]));
+                q.z *= Mathf.Sign(q.z * (matrix[1, 0] - matrix[0, 1]));
+
+                bones[i].rotation = q;
 
 
-				float sx = (new Vector3(matrix[0,0],matrix[1,0],matrix[2,0])).magnitude;
-				float sy = (new Vector3(matrix[0,1],matrix[1,1],matrix[2,1])).magnitude;
-				float sz = (new Vector3(matrix[0,2],matrix[1,2],matrix[2,2])).magnitude;
+                float sx = (new Vector3(matrix[0, 0], matrix[1, 0], matrix[2, 0])).magnitude;
+                float sy = (new Vector3(matrix[0, 1], matrix[1, 1], matrix[2, 1])).magnitude;
+                float sz = (new Vector3(matrix[0, 2], matrix[1, 2], matrix[2, 2])).magnitude;
 
-				bones[i].localScale = new Vector3(sx,sy,sz);
-			}
-			
-			Matrix4x4[] bindPoses = new Matrix4x4[numElements];
-			for(int i=0;i<numElements;i++) {
-				bindPoses[i] = bones[i].worldToLocalMatrix * go.transform.localToWorldMatrix;
+                bones[i].localScale = new Vector3(sx, sy, sz);
+            }
+
+            int numBones = numElements;
+            Transform[] bones2 = null;
+
+            
+            if (version == 2)
+            {
+                byte[] numBoneIDsBlock = new byte[4];
+                fs.Read(numBoneIDsBlock, 0, 4);
+                int numBoneIDs = BitConverter.ToInt32(numBoneIDsBlock, 0);
+
+                byte[] ReorderingBlock = new byte[4 * numBoneIDs];
+                fs.Read(ReorderingBlock, 0, 4 * numBoneIDs);
+
+                bones2 = new Transform[numBoneIDs];
+
+                for (int i = 0; i < numBoneIDs; i++)
+                {
+                    int id = BitConverter.ToInt32(ReorderingBlock, i * 4);
+                    bones2[i] = bones[id];
+                }
+                numBones = numBoneIDs;
+            } else  {
+                numBones = numElements;
+                bones2 = bones;
+
+            }
+
+
+
+            Matrix4x4[] bindPoses = new Matrix4x4[numBones];
+			for(int i=0;i< numBones; i++) {
+				bindPoses[i] = bones2[i].worldToLocalMatrix * go.transform.localToWorldMatrix;
 			}
 			
 			mesh.bindposes = bindPoses;
@@ -238,7 +443,7 @@ class ImportSkl : ScriptableWizard
 			rendererObj.transform.parent = go.transform;
 
 			SkinnedMeshRenderer renderer = rendererObj.AddComponent<SkinnedMeshRenderer>();
-			renderer.bones = bones;
+			renderer.bones = bones2;
 			renderer.sharedMesh = mesh;
 			if(rootBone != null) {
 				renderer.rootBone = rootBone;
@@ -295,9 +500,9 @@ class ImportSkn : ScriptableWizard
 					byte[] materialBlock = new byte[80];
 					for(int i=0;i<numMaterials;i++) {
 						fs.Read(materialBlock,0,80);
-						Debug.Log (materialBlock);
+						//Debug.Log (materialBlock);
 						string materialName = System.Text.Encoding.ASCII.GetString (materialBlock,0,64).TrimEnd('\0');
-						Debug.Log (name.Length);
+						//Debug.Log (name.Length);
 						int startVertex = BitConverter.ToInt32 (materialBlock,64);
 						int numMaterialVertices = BitConverter.ToInt32 (materialBlock,68);
 						int startIndex = BitConverter.ToInt32 (materialBlock,72);
@@ -358,7 +563,7 @@ class ImportSkn : ScriptableWizard
 
 					//////basic skin blitzcrank bone idx matching error temporary fix >22, +=2
 					//////custom skin blitzcrank bone idx matching error temporary fix >20 +=2
-
+                    /*
 					if(boneIdx0 >= 20) {
 						boneIdx0 +=2;
 					}
@@ -370,7 +575,7 @@ class ImportSkn : ScriptableWizard
 					}
 					if(boneIdx3 >= 20) {
 						boneIdx3 += 2;
-					}
+					}*/
 					//////////
 
 					vertices[i] = new Vector3(x,y,z);

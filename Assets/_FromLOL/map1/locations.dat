@@ -1,0 +1,4 @@
+; Name 					Mesh
+SpawnPointAlpha			__NAV_C02
+SpawnPointBravo			__NAV_C06
+SpawnPointCharlie		__NAV_C015
