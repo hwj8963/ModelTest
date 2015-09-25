@@ -15,6 +15,8 @@ public class Grab : MonoBehaviour {
     public Grabbable grabbedObj { get; private set; }
     public Transform grabbedTm { get; private set; }
 
+    GameObject HitParticle;
+
     Player player;
     // Use this for initialization
     void Start() {
@@ -22,6 +24,14 @@ public class Grab : MonoBehaviour {
         grabbedObj = null;
 
         player = FindObjectOfType<Player>();
+        HitParticle = Resources.Load("Particles/HitEnemyParticle") as GameObject;
+    }
+
+    void OnDestroy()
+    {
+        player = null;
+        HitParticle = null;
+
     }
 
     // Update is called once per frame
@@ -36,7 +46,7 @@ public class Grab : MonoBehaviour {
             grabbedTm = collider.transform;
             grabbedTm.parent = this.transform;
             //grabbedTm.transform.position = this.transform.position;
-            obj.Grap();
+            obj.Grab();
             this.state = State.Grabbed;
             player.Grabbed();
         }
@@ -64,5 +74,11 @@ public class Grab : MonoBehaviour {
         Rigidbody rigidbody = grabbedTm.GetComponent<Rigidbody>();
         rigidbody.angularVelocity = new Vector3(0f,0f, Random.Range(-540f, 540f));
         rigidbody.velocity = new Vector3(Random.Range(-500f, 500f), Random.Range(700f, 800f), 0f);
+
+        GameManager.Instance.AddScore(grabbedObj.score());
+        GameManager.Instance.AddTime(grabbedObj.addTime());
+
+
+        Instantiate(HitParticle);
     }
 }

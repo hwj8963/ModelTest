@@ -1,0 +1,12 @@
+{"VayneCondemn;f1":{"link":"bonusattackdamage","coeff":"0.5"}}
+{"VayneCondemn;f2":{"link":"","coeff":""}}
+{"VayneCondemn;f3":{"link":"","coeff":""}}
+{"VayneCondemn;f4":{"link":"","coeff":""}}
+{"VayneInquisition;f1":{"link":"","coeff":""}}
+{"VayneInquisition;f2":{"link":"","coeff":""}}
+{"VayneInquisition;f3":{"link":"","coeff":""}}
+{"VayneInquisition;f4":{"link":"","coeff":""}}
+{"VayneTumble;f1":{"link":"attackdamage","coeff":"0.3/0.35/0.4/0.45/0.5"}}
+{"VayneTumble;f2":{"link":"","coeff":""}}
+{"VayneTumble;f3":{"link":"","coeff":""}}
+{"VayneTumble;f4":{"link":"","coeff":""}}

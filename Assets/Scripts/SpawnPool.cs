@@ -84,6 +84,16 @@ public class SpawnPool : MonoBehaviour {
         
     }
 
+    public void DespawnAll()
+    {
+        foreach(GameObject go in spawnedObjs.Keys)
+        {
+            go.SendMessage("OnDespawned", SendMessageOptions.DontRequireReceiver);
+            go.SetActive(false);
+        }
+        spawnedObjs.Clear();
+    }
+
     
 
 

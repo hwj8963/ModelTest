@@ -3,8 +3,9 @@
 public interface Grabbable {
 
     //called when this object is grapped
-    void Grap();
+    void Grab();
 
     //return score of this object
     int score();
+    float addTime();
 }
