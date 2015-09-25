@@ -13,7 +13,7 @@ class ImportAnm : ScriptableWizard
 
 	[MenuItem("Custom/LOL/Import Anm")]
 	static void CreateWizard() {
-		ScriptableWizard.DisplayWizard<ImportAnm> ("Import Skl", "Import");
+		ScriptableWizard.DisplayWizard<ImportAnm> ("Import Anm", "Import");
 	}
 	void OnWizardCreate() {
 		//test create animation
@@ -37,7 +37,7 @@ class ImportAnm : ScriptableWizard
 
 		*/
 		if (anmFile == null) {
-			Debug.LogError ("null skl file");
+			Debug.LogError ("null anm file");
 			return;
 		}
 
