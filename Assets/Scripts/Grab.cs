@@ -12,7 +12,7 @@ public class Grab : MonoBehaviour {
 
     public State state { get; private set; }
 
-    public Grabbable grabbedObj { get; private set; }
+    public EnemyBase grabbedEnemy { get; private set; }
     public Transform grabbedTm { get; private set; }
 
     GameObject HitParticle;
@@ -21,7 +21,7 @@ public class Grab : MonoBehaviour {
     // Use this for initialization
     void Start() {
         this.state = State.Idle;
-        grabbedObj = null;
+        grabbedEnemy = null;
 
         player = FindObjectOfType<Player>();
         HitParticle = Resources.Load("Particles/HitEnemyParticle") as GameObject;
@@ -41,12 +41,13 @@ public class Grab : MonoBehaviour {
 
     void OnTriggerEnter(Collider collider) {
         if(this.state == State.Launched) { 
-            Grabbable obj = collider.GetComponent<Grabbable>();
-            grabbedObj = obj;
+            EnemyBase enemy = collider.GetComponent<EnemyBase>();
+            grabbedEnemy = enemy;
             grabbedTm = collider.transform;
             grabbedTm.parent = this.transform;
+            //grabbedTm.localPosition = enemy.boneRoot.localPosition;
             //grabbedTm.transform.position = this.transform.position;
-            obj.Grab();
+            enemy.Grab();
             this.state = State.Grabbed;
             player.Grabbed();
         }
@@ -75,8 +76,8 @@ public class Grab : MonoBehaviour {
         rigidbody.angularVelocity = new Vector3(0f,0f, Random.Range(-540f, 540f));
         rigidbody.velocity = new Vector3(Random.Range(-500f, 500f), Random.Range(700f, 800f), 0f);
 
-        GameManager.Instance.AddScore(grabbedObj.score());
-        GameManager.Instance.AddTime(grabbedObj.addTime());
+        GameManager.Instance.AddScore(grabbedEnemy.score());
+        GameManager.Instance.AddTime(grabbedEnemy.addTime());
 
 
         Instantiate(HitParticle);

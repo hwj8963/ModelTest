@@ -42,8 +42,8 @@ MonoBehaviour:
   material: {fileID: 2100000, guid: d80a089a34fdc59498fb6042b2d1e284, type: 2}
   mSprites:
   - name: alarm_clock
-    x: 251
-    y: 172
+    x: 0
+    y: 113
     width: 84
     height: 84
     borderLeft: 0
@@ -56,11 +56,11 @@ MonoBehaviour:
     paddingBottom: 2
   - name: bar
     x: 0
-    y: 156
-    width: 270
+    y: 97
+    width: 17
     height: 15
-    borderLeft: 12
-    borderRight: 12
+    borderLeft: 5
+    borderRight: 5
     borderTop: 0
     borderBottom: 0
     paddingLeft: 0
@@ -93,11 +93,11 @@ Prefab:
     m_Modifications:
     - target: {fileID: 0}
       propertyPath: mSprites.Array.data[1].borderLeft
-      value: 12
+      value: 5
       objectReference: {fileID: 0}
     - target: {fileID: 0}
       propertyPath: mSprites.Array.data[1].borderRight
-      value: 12
+      value: 5
       objectReference: {fileID: 0}
     - target: {fileID: 0}
       propertyPath: mSprites.Array.data[1].paddingLeft

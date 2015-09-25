@@ -2583,8 +2583,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c471cc745c2d5416d9795fced0f7186b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  speed: 50
-  rootTm: {fileID: 437510}
+  boneRoot: {fileID: 437510}
   grabParticle: {fileID: 153674}
 --- !u!137 &13708406
 SkinnedMeshRenderer:
@@ -4868,6 +4867,10 @@ Prefab:
       propertyPath: m_UseGravity
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 0}
+      propertyPath: boneRoot
+      value: 
+      objectReference: {fileID: 437510}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 0}
   m_RootGameObject: {fileID: 128216}
