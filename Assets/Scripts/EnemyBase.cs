@@ -1,8 +1,10 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public class EnemyBase : MonoBehaviour, Grabbable
+public class EnemyBase : MonoBehaviour
 {
+    public Transform boneRoot;
+
     public int Score
     {
         get;

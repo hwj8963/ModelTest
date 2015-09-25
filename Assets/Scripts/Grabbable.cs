@@ -1,4 +1,5 @@
 ﻿
+/*
 
 public interface Grabbable {
 
@@ -8,4 +9,4 @@ public interface Grabbable {
     //return score of this object
     int score();
     float addTime();
-}
+}*/
