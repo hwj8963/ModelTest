@@ -4,9 +4,6 @@ using System.Collections;
 public class GameManager : MonoBehaviour {
 
     public EnemyPattern enemyPattern;
-
-    
-
     Player player;
 
     public static GameManager Instance { get; private set; }
@@ -55,7 +52,7 @@ public class GameManager : MonoBehaviour {
     void Reset()
     {
         Score = 0;
-        RemainTime = TimeMax;
+        RemainHP = GlobalVariables.InitHP;
         IsTimeOver = false;
         FirstBlood = true;
         Level = 1;
@@ -74,12 +71,11 @@ public class GameManager : MonoBehaviour {
 	void Update () {
 
         float deltaTime = Time.deltaTime;
-        
 
         if (!IsTimeOver)
         {
-            RemainTime -= deltaTime;
-            if (RemainTime <= 0f)
+            RemainHP -= deltaTime * ReduceHPPerSecAtLevel(Level);
+            if (RemainHP <= 0f)
             {
                 IsTimeOver = true;
                 StartCoroutine(TimeOver());
@@ -87,9 +83,7 @@ public class GameManager : MonoBehaviour {
         }
     }
 
-    public static readonly float TimeMax = 20f;
-
-    public float RemainTime
+    public float RemainHP
     {
         get;
         private set;
@@ -98,6 +92,11 @@ public class GameManager : MonoBehaviour {
     {
         get;
         private set;
+    }
+    
+    float ReduceHPPerSecAtLevel(int level)
+    {
+        return (5 + level) * 5;
     }
 
     static readonly string BestScoreKey = "BestScore";
@@ -118,12 +117,12 @@ public class GameManager : MonoBehaviour {
         Score += score;
         UIManager.Instance.SetScore(Score);
     }
-    public void AddTime(float time)
+    public void AddHP(float hp)
     {
-        RemainTime += time;
-        if(RemainTime > TimeMax)
+        RemainHP += hp;
+        if(RemainHP > GlobalVariables.MaxHP)
         {
-            RemainTime = TimeMax;
+            RemainHP = GlobalVariables.MaxHP;
         }
     }
 

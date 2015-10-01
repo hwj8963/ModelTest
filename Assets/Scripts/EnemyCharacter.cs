@@ -13,7 +13,6 @@ public class EnemyCharacter : EnemyBase {
         IsCharacter = true;
         speedMin = 250;
         speedMax = 250;
-        AddTime = 1.5f;
         if(grabParticle != null)
         {
             grabParticle.SetActive(false);

@@ -10,11 +10,6 @@ public class EnemyBase : MonoBehaviour
         get;
         protected set;
     }
-    public float AddTime
-    {
-        get;
-        protected set;
-    }
     protected int speedMin;
     protected int speedMax;
 
@@ -76,10 +71,6 @@ public class EnemyBase : MonoBehaviour
     public virtual int score(bool firstBlood, int level)
     {
         return 0;
-    }
-    public float addTime()
-    {
-        return AddTime;
     }
     //implement of Grapable end
 }

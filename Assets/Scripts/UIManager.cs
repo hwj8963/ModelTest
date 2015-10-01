@@ -27,7 +27,7 @@ public class UIManager : MonoBehaviour {
 
    
     public void UpdateTime() {
-        TimeBar.value = GameManager.Instance.RemainTime / GameManager.TimeMax;
+        TimeBar.value = GameManager.Instance.RemainHP / GlobalVariables.MaxHP;
     }
 
     public void TimeOver(int score, int bestScore)

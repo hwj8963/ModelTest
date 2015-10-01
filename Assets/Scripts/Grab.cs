@@ -82,7 +82,7 @@ public class Grab : MonoBehaviour {
             GameManager.Instance.FirstBlood = false;
         }
         GameManager.Instance.AddScore(score);
-        GameManager.Instance.AddTime(grabbedEnemy.addTime());
+        GameManager.Instance.AddHP(score);
 
 
         Instantiate(HitParticle);

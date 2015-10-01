@@ -8,6 +8,5 @@ public class EnemyMinion : EnemyBase {
         IsCharacter = false;
         speedMin = 170;
         speedMax = 170;
-        AddTime = 0f;
     }
 }
