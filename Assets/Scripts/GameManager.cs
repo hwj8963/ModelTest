@@ -3,9 +3,9 @@ using System.Collections;
 
 public class GameManager : MonoBehaviour {
 
-    public SpawnPool EnemyPool;
-    public GameObject minionPrefab;
-	public GameObject AshePrefab;
+    public EnemyPattern enemyPattern;
+
+    
 
     Player player;
 
@@ -16,7 +16,13 @@ public class GameManager : MonoBehaviour {
         get;
         private set;
     }    
-    
+    public SpawnPool EnemyPool
+    {
+        get
+        {
+            return enemyPattern != null ? enemyPattern.EnemyPool : null; 
+        }
+    }
         
     void Awake()
     {
@@ -31,9 +37,6 @@ public class GameManager : MonoBehaviour {
 
 	// Use this for initialization
 	void Start () {
-        EnemyPool.Preload(minionPrefab, 10);
-		EnemyPool.Preload (AshePrefab, 5);
-        //EnemyPool.Preload(TeemoPrefab, 5);
         Reset();
     }
     void Reset()
@@ -45,36 +48,18 @@ public class GameManager : MonoBehaviour {
 
     public void Restart()
     {
-        EnemyPool.DespawnAll();
+        enemyPattern.Restart();
         player.Restart();
         Reset();
     }
 
     // Update is called once per frame
 
-    float period = 1f;
-    float time = 0f;
+    
 	void Update () {
 
         float deltaTime = Time.deltaTime;
-
-        time += deltaTime;
-        if (time > period)
-        {
-            time -= period;
-            int direction = Random.Range(0, 2)*2-1;
-            float z = Random.Range(0, 500) + 400f;
-
-			float choose = Random.Range (0f,1f);
-            if (choose < 0.4f)
-            {
-                EnemyPool.Spawn(AshePrefab, new Vector3(600 * direction, 0, z), Quaternion.Euler(0f, -90f * direction, 0f));
-            }
-            else
-            {
-                EnemyPool.Spawn(minionPrefab, new Vector3(600 * direction, 0, z), Quaternion.Euler(0f, -90f * direction, 0f));
-            }
-        }
+        
 
         if (!IsTimeOver)
         {
@@ -141,10 +126,8 @@ public class GameManager : MonoBehaviour {
             BestScore = Score;
         }
         UIManager.Instance.TimeOver(Score, BestScore);
-
-        
-
     }
+
 
     
 }
