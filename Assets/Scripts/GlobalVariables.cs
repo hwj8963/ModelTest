@@ -18,4 +18,14 @@ public class GlobalVariables : ScriptableObject {
 
     public static readonly int MaxHP = 2000;
     public static readonly int InitHP = 2000;
+    
+    public static int ReduceHPPerSecAtLevel(int level)
+    {
+        return (5 + level) * 5;
+    }
+
+    public static int ScoreForLevel(int level)
+    {
+        return (level - 1) * (level + 3) * 200;
+    }
 }

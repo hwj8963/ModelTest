@@ -74,7 +74,7 @@ public class GameManager : MonoBehaviour {
 
         if (!IsTimeOver)
         {
-            RemainHP -= deltaTime * ReduceHPPerSecAtLevel(Level);
+            RemainHP -= deltaTime * GlobalVariables.ReduceHPPerSecAtLevel(Level);
             if (RemainHP <= 0f)
             {
                 IsTimeOver = true;
@@ -94,10 +94,6 @@ public class GameManager : MonoBehaviour {
         private set;
     }
     
-    float ReduceHPPerSecAtLevel(int level)
-    {
-        return (5 + level) * 5;
-    }
 
     static readonly string BestScoreKey = "BestScore";
     int BestScore
@@ -116,6 +112,15 @@ public class GameManager : MonoBehaviour {
     {
         Score += score;
         UIManager.Instance.SetScore(Score);
+        if(Score > GlobalVariables.ScoreForLevel(Level+1))
+        {
+            LevelUp();
+        }
+    }
+    void LevelUp()
+    {
+        Level++;
+        //RemainHP = GlobalVariables.MaxHP;
     }
     public void AddHP(float hp)
     {
