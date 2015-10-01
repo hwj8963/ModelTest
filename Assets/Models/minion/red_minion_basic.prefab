@@ -113,7 +113,6 @@ GameObject:
   serializedVersion: 4
   m_Component:
   - 4: {fileID: 400848}
-  - 95: {fileID: 9596938}
   m_Layer: 0
   m_Name: red_minion_basic
   m_TagString: Untagged
@@ -1513,23 +1512,6 @@ Transform:
   - {fileID: 474888}
   m_Father: {fileID: 461934}
   m_RootOrder: 0
---- !u!95 &9596938
-Animator:
-  serializedVersion: 3
-  m_ObjectHideFlags: 1
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 100100000}
-  m_GameObject: {fileID: 116986}
-  m_Enabled: 1
-  m_Avatar: {fileID: 0}
-  m_Controller: {fileID: 9100000, guid: 997f91913eda6b042a1e9cf43e9e54e1, type: 2}
-  m_CullingMode: 0
-  m_UpdateMode: 0
-  m_ApplyRootMotion: 0
-  m_LinearVelocityBlending: 0
-  m_WarningMessage: 
-  m_HasTransformHierarchy: 1
-  m_AllowConstantClipSamplingOptimization: 1
 --- !u!137 &13771168
 SkinnedMeshRenderer:
   m_ObjectHideFlags: 1
