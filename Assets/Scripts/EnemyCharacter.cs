@@ -10,9 +10,9 @@ public class EnemyCharacter : EnemyBase {
     protected override void Init()
     {
         base.Init();
+        IsCharacter = true;
         speedMin = 250;
         speedMax = 250;
-        Score = 100;
         AddTime = 1.5f;
         if(grabParticle != null)
         {
@@ -39,5 +39,10 @@ public class EnemyCharacter : EnemyBase {
         {
             anim.enabled = false;
         }
+    }
+
+    public override int score(bool firstBlood, int level)
+    {
+        return firstBlood ? GlobalVariables.FirstBloodScore : GlobalVariables.BasicCharacterScore;
     }
 }

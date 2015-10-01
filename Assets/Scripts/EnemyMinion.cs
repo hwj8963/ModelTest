@@ -5,9 +5,9 @@ public class EnemyMinion : EnemyBase {
     protected override void Init()
     {
         base.Init();
-        speedMin = 160;
-        speedMax = 180;
-        Score = 10;
+        IsCharacter = false;
+        speedMin = 170;
+        speedMax = 170;
         AddTime = 0f;
     }
 }

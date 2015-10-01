@@ -5,7 +5,7 @@ public class EnemyBase : MonoBehaviour
 {
     public Transform boneRoot;
 
-    public int Score
+    public bool IsCharacter
     {
         get;
         protected set;
@@ -72,9 +72,10 @@ public class EnemyBase : MonoBehaviour
     {
         grabbed = true;
     }
-    public int score()
+    
+    public virtual int score(bool firstBlood, int level)
     {
-        return Score;
+        return 0;
     }
     public float addTime()
     {

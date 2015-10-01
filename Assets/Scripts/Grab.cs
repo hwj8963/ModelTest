@@ -76,7 +76,12 @@ public class Grab : MonoBehaviour {
         rigidbody.angularVelocity = new Vector3(0f,0f, Random.Range(-540f, 540f));
         rigidbody.velocity = new Vector3(Random.Range(-500f, 500f), Random.Range(700f, 800f), 0f);
 
-        GameManager.Instance.AddScore(grabbedEnemy.score());
+        int score = grabbedEnemy.score(GameManager.Instance.FirstBlood, GameManager.Instance.Level);
+        if(GameManager.Instance.FirstBlood && grabbedEnemy.IsCharacter)
+        {
+            GameManager.Instance.FirstBlood = false;
+        }
+        GameManager.Instance.AddScore(score);
         GameManager.Instance.AddTime(grabbedEnemy.addTime());
 
 

@@ -23,6 +23,19 @@ public class GameManager : MonoBehaviour {
             return enemyPattern != null ? enemyPattern.EnemyPool : null; 
         }
     }
+
+    //처음에 true, 퍼블 발생 후 false로 바뀜.
+    public bool FirstBlood
+    {
+        get;
+        set;
+    }
+
+    public int Level
+    {
+        get;
+        private set;
+    }
         
     void Awake()
     {
@@ -44,6 +57,8 @@ public class GameManager : MonoBehaviour {
         Score = 0;
         RemainTime = TimeMax;
         IsTimeOver = false;
+        FirstBlood = true;
+        Level = 1;
     }
 
     public void Restart()
