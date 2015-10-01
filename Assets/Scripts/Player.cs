@@ -5,8 +5,6 @@ public class Player : MonoBehaviour {
 
     public Grab grab;
 
-    
-
     Animator animator;
     void Start() {
         animator = this.GetComponent<Animator>();

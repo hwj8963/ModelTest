@@ -14,7 +14,11 @@ public class EnemyCharacter : EnemyBase {
         speedMax = 250;
         Score = 100;
         AddTime = 1.5f;
-        grabParticle.SetActive(false);
+        if(grabParticle != null)
+        {
+            grabParticle.SetActive(false);
+        }
+        
         if (anim != null)
         {
             anim.enabled = true;
@@ -27,7 +31,10 @@ public class EnemyCharacter : EnemyBase {
     public override void Grab()
     {
         base.Grab();
-        grabParticle.SetActive(true);
+        if (grabParticle != null)
+        {
+            grabParticle.SetActive(true);
+        }
         if (anim != null)
         {
             anim.enabled = false;

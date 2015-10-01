@@ -266,12 +266,17 @@ class ImportSklVer0 : ScriptableWizard
                 {
                     offset++;
                 }
+                while(offset%4 != 0)
+                {
+                    offset++;
+                }
                 int startOffset = offset;
                 while (namesBlock[offset] != '\0') {
                     offset++;
                 }
                 int endOffset = offset;
                 bones[i].gameObject.name = System.Text.Encoding.ASCII.GetString(namesBlock, startOffset, endOffset - startOffset);             
+
                 //Debug.Log("name_" + i + " : " + names[i]);
             }
 

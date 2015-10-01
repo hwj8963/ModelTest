@@ -7,7 +7,7 @@ public class GameManager : MonoBehaviour {
     public GameObject minionPrefab;
 	public GameObject AshePrefab;
 
-    public Player player;
+    Player player;
 
     public static GameManager Instance { get; private set; }
 
@@ -31,8 +31,9 @@ public class GameManager : MonoBehaviour {
 
 	// Use this for initialization
 	void Start () {
-        EnemyPool.Preload(minionPrefab, 20);
+        EnemyPool.Preload(minionPrefab, 10);
 		EnemyPool.Preload (AshePrefab, 5);
+        //EnemyPool.Preload(TeemoPrefab, 5);
         Reset();
     }
     void Reset()
@@ -65,11 +66,14 @@ public class GameManager : MonoBehaviour {
             float z = Random.Range(0, 500) + 400f;
 
 			float choose = Random.Range (0f,1f);
-			if(choose < 0.4f) {
-				EnemyPool.Spawn(AshePrefab, new Vector3 (600 * direction, 0 , z), Quaternion.Euler(0f,-90f*direction,0f));
-			} else {
-            	EnemyPool.Spawn(minionPrefab, new Vector3(600 * direction, 0, z),Quaternion.Euler(0f,-90f*direction,0f));
-			}
+            if (choose < 0.4f)
+            {
+                EnemyPool.Spawn(AshePrefab, new Vector3(600 * direction, 0, z), Quaternion.Euler(0f, -90f * direction, 0f));
+            }
+            else
+            {
+                EnemyPool.Spawn(minionPrefab, new Vector3(600 * direction, 0, z), Quaternion.Euler(0f, -90f * direction, 0f));
+            }
         }
 
         if (!IsTimeOver)
